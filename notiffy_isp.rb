@@ -3,7 +3,7 @@
 require 'net/smtp'
 
 #SMTP server
-SMTP_SERVER = 'localhost'
+SMTP_SERVER = '192.168.0.10'
 SMTP_PORT   = 25
 #EMAIL message setup
 EMAIL_FROM    = 'admin@panthersoftware.com'
@@ -14,7 +14,7 @@ CAT_BIN   = `which cat`.strip
 WHOIS_BIN = `which whois`.strip
 
 #LOG_FILE = SSHD's log file
-LOG_FILE = '/var/log/pwdfail/current'
+LOG_FILE = '/var/log/sshd/current'
 
 #misc
 TIME_LOCALE = 'GMT'
@@ -48,11 +48,11 @@ Date: #{time2str(Time.now)}
 
 To whom it may concern.
 
-We have detected a hack attempt which has originated from your network from ip: #{offender}
+We have detected a hack attempt originating from your network from ip: #{offender}
 
 This suggests that the above server has been compromised and is a participant in a botnet.
 
-This means that your server has been hack and now, in turn, is attempting to hack other servers on the Internet.
+This means that your server has been hacked and now, in turn, is attempting to hack other servers on the Internet.
 
 This IP address has now been blacklisted to protect our service from further brute force attacks. Furthermore, this IP address has been uploaded to a centralised database. This means that this IP address will also shortly be blacklisted by any member who queries this central database.
 
@@ -84,18 +84,19 @@ result.each_line do |line|
   contacts << email unless email == ''
 end
 
+contacts = ['mcnazar@gmail.com']
+
 #extract evidence from ssh log file
 evidence = eval("`#{CAT_BIN} #{LOG_FILE} | #{GREP_BIN} #{host}`")
 
 Net::SMTP.start(SMTP_SERVER, SMTP_PORT) do |smtp|
-  
-  #send email to each returned address
-  contacts.each do |email|
-    puts get_email_message(email, host, evidence)
-    # smtp.send_message get_email_message(email),
-        #                   EMAIL_FROM,
-        #                   email
-        
+  begin
+    #send email to each returned address
+    contacts.each do |email|
+      smtp.send_message get_email_message(email, host, evidence), EMAIL_FROM, email
+    end
+  ensure
+    smtp.finish
   end
   
 end
