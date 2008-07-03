@@ -3,10 +3,10 @@
 require 'net/smtp'
 
 #SMTP server
-SMTP_SERVER = '192.168.0.10'
+SMTP_SERVER = 'localhost'
 SMTP_PORT   = 25
 #EMAIL message setup
-EMAIL_FROM    = 'admin@panthersoftware.com'
+EMAIL_FROM    = ADD_YOUR_RETURN_EMAIL_HERE
 EMAIL_SUBJECT = 'Security Alert - Your Server Has Been Hacked!'
 #guess apps... override if required
 GREP_BIN  = `which grep`.strip
@@ -39,7 +39,7 @@ def time2str( tm )
 end
 
 def get_email_message(to_address, offender, evidence)
-  
+
 email_message = <<EOF
 From: #{EMAIL_FROM}
 To: #{to_address}
@@ -64,7 +64,7 @@ Regards.
 Panther Software Admin
 
 EOF
-  
+
 end
 
 ################# MAIN ##########################
@@ -78,13 +78,11 @@ end
 
 #extract all email contacts from given host
 contacts = []
-result = eval("`#{WHOIS_BIN} #{host} | #{GREP_BIN} e-mail`")
-result.each_line do |line| 
-  email = line[/([-a-z0-9]+[\w\.\-\+]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\z/i]
-  contacts << email unless email == ''
+lookup = eval("`#{WHOIS_BIN} #{host} | #{GREP_BIN} e-mail`")
+lookup.each_line do |line|
+  email = line[/([-a-z0-9]+[\w\.\-\+]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})/i]
+  contacts << email unless email == nil
 end
-
-contacts = ['mcnazar@gmail.com']
 
 #extract evidence from ssh log file
 evidence = eval("`#{CAT_BIN} #{LOG_FILE} | #{GREP_BIN} #{host}`")
@@ -98,5 +96,5 @@ Net::SMTP.start(SMTP_SERVER, SMTP_PORT) do |smtp|
   ensure
     smtp.finish
   end
-  
+
 end
