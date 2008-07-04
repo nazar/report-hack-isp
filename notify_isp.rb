@@ -5,9 +5,11 @@ require 'net/smtp'
 #SMTP server
 SMTP_SERVER = 'localhost'
 SMTP_PORT   = 25
+
 #EMAIL message setup
 EMAIL_FROM    = ADD_YOUR_RETURN_EMAIL_HERE
 EMAIL_SUBJECT = 'Security Alert - Your Server Has Been Hacked!'
+
 #guess apps... override if required
 GREP_BIN  = `which grep`.strip
 CAT_BIN   = `which cat`.strip
@@ -18,6 +20,7 @@ LOG_FILE = '/var/log/sshd/current'
 
 #misc
 TIME_LOCALE = 'GMT'
+EMAIL_LOG_FILE    = '/var/log/notify_isp.log'
 
 #check that we have all our BINs
 raise 'Could not find grep on your system. Manually configure GREP_BIN' if GREP_BIN == ''
@@ -40,7 +43,7 @@ end
 
 def get_email_message(to_address, offender, evidence)
 
-email_message = <<EOF
+  email_message = <<EOF
 From: #{EMAIL_FROM}
 To: #{to_address}
 Subject: #{EMAIL_SUBJECT}
@@ -92,6 +95,9 @@ Net::SMTP.start(SMTP_SERVER, SMTP_PORT) do |smtp|
     #send email to each returned address
     contacts.each do |email|
       smtp.send_message get_email_message(email, host, evidence), EMAIL_FROM, email
+      #log ip address and email 
+      my_file = File.new(EMAIL_LOG_FILE, 'a+')
+      my_file.puts "Report generated for #{host} and sent to #{email}"
     end
   ensure
     smtp.finish
