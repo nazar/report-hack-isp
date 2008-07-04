@@ -7,7 +7,7 @@ SMTP_SERVER = 'localhost'
 SMTP_PORT   = 25
 
 #EMAIL message setup
-EMAIL_FROM    = ADD_YOUR_RETURN_EMAIL_HERE
+EMAIL_FROM    = 'ADD_YOUR_RETURN_EMAIL_HERE'
 EMAIL_SUBJECT = 'Security Alert - Your Server Has Been Hacked!'
 
 #guess apps... override if required
@@ -87,6 +87,10 @@ lookup.each_line do |line|
   contacts << email unless email == nil
 end
 
+#if contacts includes an abuse@ address then only send it to those.
+tmp = contacts.select { |email| email[/abuse@/] }
+contacts = tmp.unique if tmp.length > 0
+
 #extract evidence from ssh log file
 evidence = eval("`#{CAT_BIN} #{LOG_FILE} | #{GREP_BIN} #{host}`")
 
@@ -94,7 +98,7 @@ Net::SMTP.start(SMTP_SERVER, SMTP_PORT) do |smtp|
   begin
     #send email to each returned address
     contacts.each do |email|
-      smtp.send_message get_email_message(email, host, evidence), EMAIL_FROM, email
+#      smtp.send_message get_email_message(email, host, evidence), EMAIL_FROM, email
       #log ip address and email 
       my_file = File.new(EMAIL_LOG_FILE, 'a+')
       my_file.puts "Report generated for #{host} and sent to #{email}"
