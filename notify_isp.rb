@@ -55,7 +55,7 @@ We have detected a hack attempt originating from your network from ip: #{offende
 
 This suggests that the above server has been compromised and is a participant in a botnet.
 
-This means that your server has been hacked and now, in turn, is attempting to hack other servers on the Internet.
+This means that this server has been hacked and now, in turn, is attempting to hack other servers on the Internet.
 
 This IP address has now been blacklisted to protect our service from further brute force attacks. Furthermore, this IP address has been uploaded to a centralised database. This means that this IP address will also shortly be blacklisted by any member who queries this central database.
 
@@ -79,7 +79,7 @@ else
   raise 'No ip address or host given. Exiting'
 end
 
-#extract all email contacts from given host
+#extract all email contacts for given host
 contacts = []
 lookup = eval("`#{WHOIS_BIN} #{host} | #{GREP_BIN} e-mail`")
 lookup.each_line do |line|
