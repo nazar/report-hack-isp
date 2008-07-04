@@ -16,7 +16,7 @@ CAT_BIN   = `which cat`.strip
 WHOIS_BIN = `which whois`.strip
 
 #LOG_FILE = SSHD's log file
-LOG_FILE = '/var/log/sshd/current'
+LOG_FILE = '/var/log/sshd/*'
 
 #misc
 TIME_LOCALE = 'GMT'
