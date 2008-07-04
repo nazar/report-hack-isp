@@ -98,7 +98,7 @@ Net::SMTP.start(SMTP_SERVER, SMTP_PORT) do |smtp|
   begin
     #send email to each returned address
     contacts.each do |email|
-#      smtp.send_message get_email_message(email, host, evidence), EMAIL_FROM, email
+      smtp.send_message get_email_message(email, host, evidence), EMAIL_FROM, email
       #log ip address and email 
       my_file = File.new(EMAIL_LOG_FILE, 'a+')
       my_file.puts "Report generated for #{host} and sent to #{email}"
