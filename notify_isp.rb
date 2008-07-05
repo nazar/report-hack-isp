@@ -1,5 +1,9 @@
 #! /usr/bin/ruby
 
+#Ruby DenyHosts plugin to report attacker to ISP
+#
+#Copyright 2008 Nazar Aziz - nazar@panthersoftware.com
+
 require 'net/smtp'
 
 #SMTP server
@@ -8,7 +12,7 @@ SMTP_PORT   = 25
 
 #EMAIL message setup
 EMAIL_FROM    = 'ADD_YOUR_RETURN_EMAIL_HERE'
-EMAIL_SUBJECT = 'Security Alert - Your Server Has Been Hacked!'
+EMAIL_SUBJECT = 'Security Alert - Your Server May Have Been Hacked!'
 
 #guess apps... override if required
 GREP_BIN  = `which grep`.strip
@@ -64,8 +68,6 @@ An excerpt from our logfiles. All times shown are in #{TIME_LOCALE}:
 #{evidence}
 
 Regards.
-Panther Software Admin
-
 EOF
 
 end
