@@ -104,7 +104,11 @@ contacts = get_contacts_for_host(host)
 #if given ip then lookup to hostname
 if host[/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/]
   host_domain = eval("`#{HOST_BIN} #{host}`").strip
-  host_domain = host_domain[/.+\.(\w+\.\w+)/,1]
+  unless host_domain =~ /not found:/ 
+    host_domain = host_domain[/.+\.(\w+\.\w+)/,1] 
+  else #no good... no back DNS pointer
+    host_domain = nil
+  end
 else
   host_domain = host[/.+\.(\w+\.\w+)/,1]
 end
