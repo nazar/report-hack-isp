@@ -107,7 +107,7 @@ if host[/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/]
   host_domain = eval("`#{HOST_BIN} #{host}`").strip
   unless host_domain =~ /not found:/ 
     host_domain = host_domain[/.+\.(\w+\.\w+)/,1] 
-  else #no good... no back DNS pointer
+  else #no good... no revers DNS pointer
     host_domain = nil
   end
 else 
