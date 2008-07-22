@@ -13,6 +13,8 @@ SMTP_PORT   = 25
 #EMAIL message setup
 EMAIL_FROM    = 'ADD_YOUR_RETURN_EMAIL_HERE'
 EMAIL_SUBJECT = 'Security Alert - Your Server May Have Been Hacked!'
+# Leave empty to not send a mail to a CC adress, else you can add your MAIL_FROM adress here
+CC = ''
 
 #guess apps... override if required
 GREP_BIN  = `which grep`.strip
@@ -47,13 +49,31 @@ def time2str( tm )
           *(offset / 60).divmod(60)
 end
 
-def get_email_message(to_address, offender, evidence)
+def get_email_message(to_address, to_cc, offender, evidence)
 
-  email_message = <<EOF
+if to_cc == ''
+
+   email_header = << EOF
 From: #{EMAIL_FROM}
 To: #{to_address}
 Subject: #{EMAIL_SUBJECT}
 Date: #{time2str(Time.now)}
+EOF
+
+else
+
+  email_header = << EOF
+From: #{EMAIL_FROM}
+To: #{to_address}
+CC: #{to_cc}
+Subject: #{EMAIL_SUBJECT}
+Date: #{time2str(Time.now)}
+EOF
+
+end
+
+  email_message = <<EOF
+#{email_header}
 
 To whom it may concern.
 
@@ -138,7 +158,7 @@ Net::SMTP.start(SMTP_SERVER, SMTP_PORT) do |smtp|
   begin
     #send email to each returned address
     contacts.flatten.each do |email|
-      smtp.send_message get_email_message(email, host, evidence), EMAIL_FROM, email
+      smtp.send_message get_email_message(email, CC, host, evidence), EMAIL_FROM, email
       #log ip address and email 
       my_file = File.new(EMAIL_LOG_FILE, 'a+')
       my_file.puts "Report generated for #{host} and sent to #{email} on #{Time.now.to_s}"
