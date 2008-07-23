@@ -13,7 +13,7 @@ SMTP_PORT   = 25
 #EMAIL message setup
 EMAIL_FROM    = 'ADD_YOUR_RETURN_EMAIL_HERE'
 EMAIL_SUBJECT = 'Security Alert - Your Server May Have Been Hacked!'
-# Leave empty to not send a mail to a CC adress, else you can add your MAIL_FROM adress here
+# Leave empty to not send a mail to a CC address
 CC = ''
 
 #guess apps... override if required
@@ -49,31 +49,13 @@ def time2str( tm )
           *(offset / 60).divmod(60)
 end
 
-def get_email_message(to_address, to_cc, offender, evidence)
-
-if to_cc == ''
-
-   email_header = << EOF
-From: #{EMAIL_FROM}
-To: #{to_address}
-Subject: #{EMAIL_SUBJECT}
-Date: #{time2str(Time.now)}
-EOF
-
-else
-
-  email_header = << EOF
-From: #{EMAIL_FROM}
-To: #{to_address}
-CC: #{to_cc}
-Subject: #{EMAIL_SUBJECT}
-Date: #{time2str(Time.now)}
-EOF
-
-end
-
+def get_email_message(to_address, offender, evidence)
+  to_cc = CC.length > 0 ? "\nCC: #{CC}" : ''
   email_message = <<EOF
-#{email_header}
+From: #{EMAIL_FROM}
+To: #{to_address}#{to_cc}
+Subject: #{EMAIL_SUBJECT}
+Date: #{time2str(Time.now)}
 
 To whom it may concern.
 
@@ -83,7 +65,7 @@ This suggests that the above server has been compromised and is a participant in
 
 This means that this server has been hacked and now, in turn, is attempting to hack other servers on the Internet.
 
-This IP address has now been blacklisted to protect our service from further brute force attacks. Furthermore, this IP address has been uploaded to a centralised database. This means that this IP address will also shortly be blacklisted by any member who queries this central database.
+This IP address has now been blacklisted to protect our service from further brute force attacks. Furthermore, this IP address has been uploaded to DenyHosts' centralised database. This means that this IP address will also shortly be blacklisted by any member who queries DenyHosts' central database.
 
 An excerpt from our logfiles. All times shown are in #{TIME_LOCALE}:
 
@@ -152,13 +134,16 @@ raise "No evidence found for #{host}. Aborting" unless evidence && (evidence.len
 sent = eval("`#{CAT_BIN} #{EMAIL_LOG_FILE} | #{GREP_BIN} #{host}`").strip
 raise "Host #{host} has already been reported. Not reporting again." if sent && sent.length > 0
 
+#are we CCing ourselves?
+contacts << CC if CC.length > 0
+
 #by the time we get here we have evidence against a newly reported host
 Net::SMTP.start(SMTP_SERVER, SMTP_PORT) do |smtp|
   
   begin
     #send email to each returned address
     contacts.flatten.each do |email|
-      smtp.send_message get_email_message(email, CC, host, evidence), EMAIL_FROM, email
+      smtp.send_message get_email_message(email, host, evidence), EMAIL_FROM, email
       #log ip address and email 
       my_file = File.new(EMAIL_LOG_FILE, 'a+')
       my_file.puts "Report generated for #{host} and sent to #{email} on #{Time.now.to_s}"
