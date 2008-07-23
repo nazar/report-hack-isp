@@ -126,7 +126,7 @@ raise "No email addresses were returned" unless contacts.length > 0
 
 #extract evidence from ssh log file using the reported host as a filter
 evidence = eval("`#{CAT_BIN} #{LOG_FILE} | #{GREP_BIN} #{host}`").strip
-raise "No evidence found for IP #{host}. Aborting" unless evidence && (evidence.length > 0)
+raise "No evidence found for #{host}. Aborting" unless evidence && (evidence.length > 0)
 
 #workaround for DenyHosts bug that runs plugin evrytime an IP is added against all blacklisted IPS
 sent = eval("`#{CAT_BIN} #{EMAIL_LOG_FILE} | #{GREP_BIN} #{host}`").strip
