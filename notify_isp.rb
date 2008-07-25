@@ -25,20 +25,21 @@ LOG_FILE = '/var/log/sshd/*'
 
 #misc
 TIME_LOCALE = 'GMT+1'
-##### CHECK PERMISSIONS ON DESTINATION DIRECTORY. YOU MAY NEED TO TOUCH THE EMAIL_LOG_FILE FILE TO INITIALLY CREATE IT
-EMAIL_LOG_FILE    = '/var/log/notify_isp.log' 
+EMAIL_LOG_FILE    = '/var/log/notify_isp.log'  ##### CHECK PERMISSIONS ON DESTINATION DIRECTORY. 
 
 #guess apps... override if required
 GREP_BIN  = `which grep`.strip
 CAT_BIN   = `which cat`.strip
 WHOIS_BIN = `which whois`.strip
 HOST_BIN  = `which host`.strip
+TOUCH_BIN = `which touch`.strip
 
 #check that we have all our BINs
 raise 'Could not find grep on your system. Manually configure GREP_BIN' if GREP_BIN == ''
 raise 'Could not find cat on your system. Manually configure CAT_BIN' if CAT_BIN == ''
 raise 'Could not find whois on your system. Manually configure WHOIS_BIN' if WHOIS_BIN == ''
 raise 'Could not find host on your system. Manually configure HOST_BIN' if HOST_BIN == ''
+raise 'Could not find touch on your system. Manually configure TOUCH_BIN' if HOST_BIN == ''
 
 
 ################# UTILS ########################
@@ -105,6 +106,9 @@ else
   raise 'No ip address or host given. Exiting'
 end
 
+#make sure the EMAIL_LOG_FILE exists
+eval("`#{TOUCH_BIN} #{EMAIL_LOG_FILE}`")
+
 #extract all email contacts for given host
 contacts = get_contacts_for_host(host)
 
@@ -135,7 +139,7 @@ raise "No email addresses were returned" unless contacts.length > 0
 evidence = eval("`#{CAT_BIN} #{LOG_FILE} | #{GREP_BIN} #{host}`").strip
 raise "No evidence found for #{host}. Aborting" unless evidence && (evidence.length > 0)
 
-#workaround for DenyHosts that runs plugin evrytime an IP is added against all blacklisted IPS
+#workaround for DenyHosts that runs the plugin evrytime an IP is added against all blacklisted IPS
 sent = eval("`#{CAT_BIN} #{EMAIL_LOG_FILE} | #{GREP_BIN} #{host}`").strip
 raise "Host #{host} has already been reported. Not reporting again." if sent && sent.length > 0
 
