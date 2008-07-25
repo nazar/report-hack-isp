@@ -19,6 +19,8 @@ EMAIL_FROM    = 'ADD_YOUR_RETURN_EMAIL_HERE' ####### ADD YOUR ACTUALL EMAIL ADDR
 EMAIL_SUBJECT = 'Security Alert - Your Server May Have Been Hacked!'
 # Leave empty to not send a mail to a CC address
 CC = ''
+# Same as for the CC address, you probably only need one of these
+BCC = ''
 
 #LOG_FILE = SSHD's log file ###### UPDATE THIS TO YOUR ACTUAL SSHD LOG FILE LOCATION #####
 LOG_FILE = '/var/log/sshd/*'  
@@ -57,9 +59,11 @@ end
 
 def get_email_message(to_address, offender, evidence)
   to_cc = CC.length > 0 ? "\nCC: #{CC}" : ''
+  to_bcc = BCC.length > 0 ? "\nBCC: #{BCC}" : ''
+
   email_message = <<EOF
 From: #{EMAIL_FROM}
-To: #{to_address}#{to_cc}
+To: #{to_address}#{to_cc}#{to_bcc}
 Subject: #{EMAIL_SUBJECT}
 Date: #{time2str(Time.now)}
 
@@ -143,8 +147,9 @@ raise "No evidence found for #{host}. Aborting" unless evidence && (evidence.len
 sent = eval("`#{CAT_BIN} #{EMAIL_LOG_FILE} | #{GREP_BIN} #{host}`").strip
 raise "Host #{host} has already been reported. Not reporting again." if sent && sent.length > 0
 
-#are we CCing ourselves?
+#are we CC/BCCing ourselves?
 contacts << CC if CC.length > 0
+contacts << BCC if BCC.length > 0
 
 #by the time we get here we have evidence against a newly reported host
 Net::SMTP.start(SMTP_SERVER, SMTP_PORT) do |smtp|
