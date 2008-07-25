@@ -4,6 +4,10 @@
 #
 #Copyright 2008 Nazar Aziz - nazar@panthersoftware.com
 
+#######################################################################################
+####### PLEASE READ INSTRUCTIONS: http://github.com/nazar/report-hack-isp/wikis #######
+#######################################################################################
+
 require 'net/smtp'
 
 #SMTP server
@@ -11,23 +15,24 @@ SMTP_SERVER = 'localhost'
 SMTP_PORT   = 25
 
 #EMAIL message setup
-EMAIL_FROM    = 'ADD_YOUR_RETURN_EMAIL_HERE'
+EMAIL_FROM    = 'ADD_YOUR_RETURN_EMAIL_HERE' ####### ADD YOUR ACTUALL EMAIL ADDRESS HERE ##########
 EMAIL_SUBJECT = 'Security Alert - Your Server May Have Been Hacked!'
 # Leave empty to not send a mail to a CC address
 CC = ''
+
+#LOG_FILE = SSHD's log file ###### UPDATE THIS TO YOUR ACTUAL SSHD LOG FILE LOCATION #####
+LOG_FILE = '/var/log/sshd/*'  
+
+#misc
+TIME_LOCALE = 'GMT+1'
+##### CHECK PERMISSIONS ON DESTINATION DIRECTORY. YOU MAY NEED TO TOUCH THE EMAIL_LOG_FILE FILE TO INITIALLY CREATE IT
+EMAIL_LOG_FILE    = '/var/log/notify_isp.log' 
 
 #guess apps... override if required
 GREP_BIN  = `which grep`.strip
 CAT_BIN   = `which cat`.strip
 WHOIS_BIN = `which whois`.strip
 HOST_BIN  = `which host`.strip
-
-#LOG_FILE = SSHD's log file
-LOG_FILE = '/var/log/sshd/*'
-
-#misc
-TIME_LOCALE = 'GMT+1'
-EMAIL_LOG_FILE    = '/var/log/notify_isp.log'
 
 #check that we have all our BINs
 raise 'Could not find grep on your system. Manually configure GREP_BIN' if GREP_BIN == ''
@@ -130,7 +135,7 @@ raise "No email addresses were returned" unless contacts.length > 0
 evidence = eval("`#{CAT_BIN} #{LOG_FILE} | #{GREP_BIN} #{host}`").strip
 raise "No evidence found for #{host}. Aborting" unless evidence && (evidence.length > 0)
 
-#workaround for DenyHosts bug that runs plugin evrytime an IP is added against all blacklisted IPS
+#workaround for DenyHosts that runs plugin evrytime an IP is added against all blacklisted IPS
 sent = eval("`#{CAT_BIN} #{EMAIL_LOG_FILE} | #{GREP_BIN} #{host}`").strip
 raise "Host #{host} has already been reported. Not reporting again." if sent && sent.length > 0
 
