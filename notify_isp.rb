@@ -160,7 +160,7 @@ Net::SMTP.start(SMTP_SERVER, SMTP_PORT) do |smtp|
       smtp.send_message get_email_message(email, host, evidence), EMAIL_FROM, email
       #log ip address and email 
       my_file = File.new(EMAIL_LOG_FILE, 'a+')
-      my_file.puts "Report generated for #{host} and sent to #{email} on #{Time.now.to_s}"
+      my_file.puts "Report generated for #{host} on #{Time.now.to_s} and sent to #{email}"
     end
   ensure
     smtp.finish
